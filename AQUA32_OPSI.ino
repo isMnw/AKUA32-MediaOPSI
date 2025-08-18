@@ -96,7 +96,7 @@ void loop() {
 
   // rumus tegangan panel surya
   float Vread = (nilai[4] * VCC) / ADC;
-  skor[4] = Vread * ()
+  skor[4] = Vread * (30000.0 )
   
   // tampilkan nilai di Serial Monitor, lebih untuk membaca data yang akan ditampilkan
   Serial.print("Kejernihan:");
