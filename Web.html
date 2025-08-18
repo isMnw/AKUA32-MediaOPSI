@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AQUA32 Sensor Monitor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #f1f1f1;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      border-bottom-left-radius: 15px;
+      border-bottom-right-radius: 15px;
+      background: #1f1f1f;
+      padding: 15px;
+      text-align: center;
+      font-size: 26px;
+      font-weight: bold;
+      color: #ffcc00;
+      box-shadow: 0 4px 8px rgba(82, 82, 82, 0.4);
+      position: relative;
+    }
+
+    #title {
+      text-decoration: underline;
+    }
+
+    #datetime {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: #cccccc;
+    }
+
+    @media (max-width: 600px) {
+      #datetime {
+        position: static;
+        display: block;
+        margin-top: 5px;
+        text-align: center;
+        transform: none;
+      }
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .info {
+      margin: 10px;
+      font-size: 16px;
+      color: #cccccc;
+    }
+
+    .cards {
+      display: grid;
+      grid-gap: 30px;
+
+    }
+
+    @media (max-width: 600px) {
+      .cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (min-width: 601px) and (max-width: 1024px) {
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1025px) {
+      .cards {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .card {
+      padding: 15px;
+      border-radius: 12px;
+      background: #1f1f1f;
+      box-shadow: 0 4px 8px rgba(82, 82, 82, 0.4);
+      text-align: center;
+      min-width: 250px;
+    }
+
+    .label {
+      font-size: 14px;
+      color: #aaaaaa;
+    }
+
+    .value {
+      font-size: 24px;
+      margin-top: 8px;
+      color: #ffcc00;
+    }
+
+    footer {
+      border-top-left-radius: 15px;
+      border-top-right-radius: 15px;
+      background: #1f1f1f;
+      text-align: center;
+      padding: 10px;
+      font-size: 14px;
+      color: #ffcc00;
+      box-shadow: 0 -4px 8px rgba(82, 82, 82, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div id="title">AQUA32 Sensor Monitor</div>
+    <div id="datetime"></div>
+  </header>
+
+  <main>
+    <div class="info"><i id="status">Menyambungkan ke AQUA32...</i></div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="label">Suhu</div>
+        <div class="value" id="temp">-- °C</div>
+      </div>
+
+      <div class="card">
+        <div class="label">TDS</div>
+        <div class="value" id="tds">-- ppm</div>
+      </div>
+
+      <div class="card">
+        <div class="label">pH</div>
+        <div class="value" id="ph">--</div>
+      </div>
+
+      <div class="card">
+        <div class="label">Kejernihan</div>
+        <div class="value" id="kejernihan">--</div>
+      </div>
+    </div>
+  </main>
+
+  <footer onclick="return confirm('credit oleh tim DeWan')"><i>copyright © Tim DeWan</i></footer>
+
+  <script>
+    // tanggal dan jam
+    function updateTime() {
+      let now = new Date();
+      let options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+      let date = now.toLocaleDateString('id-ID', options);
+      let time = now.toLocaleTimeString('id-ID');
+      document.getElementById("datetime").innerHTML ="| " + date + " " + time +" |";
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
+
+    // fetch data dari ESP32
+    function fetchData(){
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          var xml = this.responseXML;
+          document.getElementById("temp").innerHTML =
+            xml.getElementsByTagName('TEMP')[0].childNodes[0].nodeValue + " °C";
+          document.getElementById("tds").innerHTML =
+            xml.getElementsByTagName('TDS')[0].childNodes[0].nodeValue + " ppm";
+          document.getElementById("ph").innerHTML =
+            xml.getElementsByTagName('PH')[0].childNodes[0].nodeValue;
+          document.getElementById("kejernihan").innerHTML =
+            xml.getElementsByTagName('CLR')[0].childNodes[0].nodeValue;
+
+          document.getElementById("status").innerHTML = "Telah terhubung dengan AQUA32 ✔";
+        }
+      };
+      xhr.open("GET", "/xml", true);
+      xhr.send();
+    }
+    setInterval(fetchData, 1000);
+  </script>
+</body>
+</html>
