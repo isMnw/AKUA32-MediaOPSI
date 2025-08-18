@@ -109,6 +109,8 @@ void loop() {
   Serial.print(String(int(skor[2])) + "ppm");
   Serial.print("  |   pH:");
   Serial.print(skor[3], 2);
+  Serial.print("  |   Voltase Panel Surya:");
+  Serial.print(skor[4], 2 + "V");
   Serial.println();
   
   delay(1000); // durasi update data
