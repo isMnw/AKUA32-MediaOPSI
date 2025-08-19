@@ -85,7 +85,7 @@
 
     @media (min-width: 1025px) {
       .cards {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
       }
     }
 
@@ -95,7 +95,7 @@
       background: #1f1f1f;
       box-shadow: 0 4px 8px rgba(82, 82, 82, 0.4);
       text-align: center;
-      min-width: 250px;
+      min-width: 300px;
     }
 
     .label {
@@ -123,22 +123,22 @@
 </head>
 <body>
   <header>
-    <div id="title">AQUA32 Sensor Monitor</div>
+    <div id="title">AKUA32 Sensor Monitor</div>
     <div id="datetime"></div>
   </header>
 
   <main>
-    <div class="info"><i id="status">Menyambungkan ke AQUA32...</i></div>
+    <div class="info"><i id="status">Menyambungkan ke AKUA32...</i></div>
 
     <div class="cards">
       <div class="card">
         <div class="label">Suhu</div>
-        <div class="value" id="temp">-- °C</div>
+        <div class="value" id="suhu">--</div>
       </div>
 
       <div class="card">
         <div class="label">TDS</div>
-        <div class="value" id="tds">-- ppm</div>
+        <div class="value" id="tds">--</div>
       </div>
 
       <div class="card">
@@ -147,48 +147,43 @@
       </div>
 
       <div class="card">
+        <div class="label">Voltase</div>
+        <div class="value" id="voltase">--</div>
+      </div>
+
+      <div class="card">
         <div class="label">Kejernihan</div>
         <div class="value" id="kejernihan">--</div>
       </div>
+
     </div>
   </main>
 
   <footer onclick="return confirm('credit oleh tim DeWan')"><i>copyright © Tim DeWan</i></footer>
 
   <script>
-    // tanggal dan jam
     function updateTime() {
       let now = new Date();
       let options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
       let date = now.toLocaleDateString('id-ID', options);
       let time = now.toLocaleTimeString('id-ID');
       document.getElementById("datetime").innerHTML ="| " + date + " " + time +" |";
-    }
-    setInterval(updateTime, 1000);
-    updateTime();
+      }
+      setInterval(updateTime, 1000);
+      updateTime();
 
-    // fetch data dari ESP32
-    function fetchData(){
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          var xml = this.responseXML;
-          document.getElementById("temp").innerHTML =
-            xml.getElementsByTagName('TEMP')[0].childNodes[0].nodeValue + " °C";
-          document.getElementById("tds").innerHTML =
-            xml.getElementsByTagName('TDS')[0].childNodes[0].nodeValue + " ppm";
-          document.getElementById("ph").innerHTML =
-            xml.getElementsByTagName('PH')[0].childNodes[0].nodeValue;
-          document.getElementById("kejernihan").innerHTML =
-            xml.getElementsByTagName('CLR')[0].childNodes[0].nodeValue;
-
-          document.getElementById("status").innerHTML = "Telah terhubung dengan AQUA32 ✔";
-        }
-      };
-      xhr.open("GET", "/xml", true);
-      xhr.send();
+    function updateData() {
+      fetch("/data")
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById("kejernihan").innerHTML = data.skalakejernihan + " : " + data.tingkatkejernihan;
+        document.getElementById("suhu").innerHTML = data.suhu + " °C";
+        document.getElementById("tds").innerHTML = data.tds + " ppm";
+        document.getElementById("ph").innerHTML = data.ph;
+        document.getElementById("voltase").innerHTML = data.voltase + " V";
+      });
     }
-    setInterval(fetchData, 1000);
+    setInterval(updateData, 100);
   </script>
-</body>
+ </body>
 </html>
